@@ -37,7 +37,7 @@ double cal_sqrt(double num, double prec){
 	if (prec <= 0 || num < 0){ // if precision or num is less than 0, return DBL_MAX to show an input error.
 		return DBL_MAX;
 	}
-	if (!num){
+	if (num == 0){
 		return 0;
 	}
 	double x_k, x_k_1 = num;
@@ -207,8 +207,25 @@ double taylor_sin(double x, int n, double pi){
 		}
 		res += sig * exp / fact;
 	}
+	if (res > 1){
+		res = 1;
+	} else if (res < -1){
+		res = -1;
+	}
 	return res;
 }
+
+
+double sin_2_cos(double x, int n, double pi){
+	double sin = taylor_sin(x, n, pi);
+//	printf("sin = %lf\n", sin);
+	double exp = cal_exp(sin, 2);
+//	printf("exp = %lf\n", exp);	
+//	printf("== 0 ? %d\n", 1 - exp == 0);	
+	double sqrt = cal_sqrt(1 - exp, 0.000001);
+//	printf("sqrt = %lf\n", sqrt);	
+	return sqrt;
+} 
 
 
 /********************************************************
@@ -240,6 +257,11 @@ double taylor_cos(double x, int n, double pi){
 			return DBL_MAX;
 		}
 		res += sig * exp / fact;
+	}
+	if (res > 1){
+		res = 1;
+	} else if (res < -1){
+		res = -1;
 	}
 	return res;	
 }

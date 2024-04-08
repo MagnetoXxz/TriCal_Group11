@@ -16,6 +16,7 @@ double cmp_arcs(double x, int n, double accu, double pi);
 double taylor_arcs(double x, int n);
 double cmp_arct(double x, int n, double accu, double pi);
 double cmp_arcc(double x, int n, double accu, double pi);
+double sin_2_cos(double x, int n, double pi);
 
 #endif
 
