@@ -116,6 +116,7 @@ int main(int argc, char** argv) {
 	    		printf("cos(%lf) = %lf\n", rad, taylor_cos(rad, n, pi));
 	    		break;
 	    	case 3:
+	    		double tan; 
 				printf("请选择输入 1. 弧度 rad 或 2. 角度 angle：");
 	    		scanf("%d", &mode);
 	    		
@@ -136,7 +137,15 @@ int main(int argc, char** argv) {
 	    				scanf("%lf", &rad);
 	            		break; 
 				}
-				printf("tan(%lf) = %lf\n", rad, taylor_tan(rad, n, pi));
+				tan = taylor_tan(rad, n, pi);
+				if (tan == DBL_MAX)
+				{
+					printf("tan(%lf) 不存在\n", rad);
+				}
+				else
+				{
+					printf("tan(%lf) = %lf\n", rad, tan);
+				} 
 	    		break;   		    	
 	        case 4:
 	        	printf("请输入 x 的值：");
