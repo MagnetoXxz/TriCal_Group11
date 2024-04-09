@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <float.h>
+#include<conio.h>
 
 #include "TriMath.h"
 #include "test.h"
@@ -16,7 +17,7 @@ new_interf interf = main_interf;
 
 double show_main_interf(void){
 	interf = main_interf;
-	system("cls");
+//	system("cls");
 	printf("Welcome to TriCal programme, you can calculate the value of any trigonometric function!\n");
 	printf("1. Calculate a sine function.\n");
 	printf("2. Calculate a cosine function.\n");
@@ -24,6 +25,7 @@ double show_main_interf(void){
 	printf("4. Calculate a arcsin function.\n");
 	printf("5. Calculate a arccos function.\n");
 	printf("6. Calculate a arctan function.\n");
+	printf("请输入对应函数的序号, 输入数字9退出程序.\n");
 	return 0;
 }
 
@@ -38,22 +40,138 @@ double show(void){
 } 
 
 
-int main(int argc, char** argv) {
-	double accu = 0.0000001;
-	int n = 15;
-	double pi = cal_pi(accu), x = 1000;
-	double rad = 0;
-	double angle = 6800;
-	printf("sin(%lf) = %lf\n", rad, taylor_sin(angle_2_rad(angle, pi), n, pi));
-	printf("cos(%lf) = %lf\n", rad, taylor_cos(rad, 15, pi));
-	printf("tan(%lf) = %lf\n", rad, taylor_tan(rad, 15, pi));
-	printf("arcsin(%lf) = %lf\n", x, cmp_arcs(x, n, accu, pi));
-	printf("arccos(%lf) = %lf\n", x, cmp_arcc(x, n, accu, pi));
-	printf("arctan(%lf) = %lf\n", x, cmp_arct(x, n, accu, pi));
-	printf("cos(%lf) = %lf\n", rad, sin_2_cos(rad, n + 1, pi));
-	printf("%d\n", taylor_cos(rad, n, pi) - 0.5 > sin_2_cos(rad, n, pi) - 0.5);
-	printf("%d\n", cal_abs(taylor_cos(rad, n, pi) - 1) < cal_abs(sin_2_cos(rad, n, pi) - 1));
-	printf("deviation of sin(%lf)° is %lf%%\n", angle, sin_deviat(angle, n, pi) * 100);
-	printf("deviation of arctan(%lf) is %lf%%\n", 1000, arct_deviat(1000, n, accu, pi) * 100);
+int isInRange(double x) {
+    if (x < -1 || x > 1) {
+        printf("错误：x 的值必须在 -1 和 1 之间。\n");
+        return 0;
+    }
+    return 1;
 }
+
+
+int main(int argc, char** argv) {
+    double accu = 0.0000001;
+    int n = 15;
+    double pi = cal_pi(accu);
+    double x, rad, angle;
+    int key, mode;
+	
+	while(1)
+	{
+		system("cls");
+		show();
+		scanf("%d", &key);
+		
+		if (key == 9)
+		{
+			return 0;
+		}
+		
+		switch (key)
+    	{
+	    	case 1:
+				printf("请选择输入 1. 弧度 rad 或 2. 角度 angle：");
+	    		scanf("%d", &mode);
+	    		
+				switch (mode)
+				{
+					case 1:
+						printf("请输入弧度 rad 的值：");
+	    				scanf("%lf", &rad);
+	    				break;
+	    			case 2:
+	    				printf("请输入角度 angle 的值：");
+	    				scanf("%lf", &angle);
+	    				rad = angle_2_rad(angle, pi);
+	    				break;
+					default:
+	            		printf("错误输入\n");
+	            		printf("请输入弧度 rad 的值：");
+	    				scanf("%lf", &rad);
+	            		break; 
+				}
+	    		printf("sin(%lf) = %lf\n", rad, taylor_sin(rad, n, pi));
+	    		break;
+	    	case 2:
+				printf("请选择输入 1. 弧度 rad 或 2. 角度 angle：");
+	    		scanf("%d", &mode);
+	    		
+				switch (mode)
+				{
+					case 1:
+						printf("请输入弧度 rad 的值：");
+	    				scanf("%lf", &rad);
+	    				break;
+	    			case 2:
+	    				printf("请输入角度 angle 的值：");
+	    				scanf("%lf", &angle);
+	    				rad = angle_2_rad(angle, pi);
+	    				break;
+					default:
+	            		printf("错误输入\n");
+	            		printf("请输入弧度 rad 的值：");
+	    				scanf("%lf", &rad);
+	            		break; 
+				}
+	    		printf("cos(%lf) = %lf\n", rad, taylor_cos(rad, n, pi));
+	    		break;
+	    	case 3:
+				printf("请选择输入 1. 弧度 rad 或 2. 角度 angle：");
+	    		scanf("%d", &mode);
+	    		
+				switch (mode)
+				{
+					case 1:
+						printf("请输入弧度 rad 的值：");
+	    				scanf("%lf", &rad);
+	    				break;
+	    			case 2:
+	    				printf("请输入角度 angle 的值：");
+	    				scanf("%lf", &angle);
+	    				rad = angle_2_rad(angle, pi);
+	    				break;
+					default:
+	            		printf("错误输入\n");
+	            		printf("请输入弧度 rad 的值：");
+	    				scanf("%lf", &rad);
+	            		break; 
+				}
+				printf("tan(%lf) = %lf\n", rad, taylor_tan(rad, n, pi));
+	    		break;   		    	
+	        case 4:
+	        	printf("请输入 x 的值：");
+	    		scanf("%lf", &x);
+	
+	    		if (!isInRange(x)) 
+					{
+	        			break;
+					}
+				printf("arcsin(%lf) = %lf\n", x, cmp_arcs(x, n, accu, pi));
+	            break;
+	        case 5:
+	        	printf("请输入 x 的值：");
+	    		scanf("%lf", &x);
+	
+	    		if (!isInRange(x)) 
+					{
+	        			break;
+					}
+				printf("arccos(%lf) = %lf\n", x, cmp_arcc(x, n, accu, pi));
+	            break;
+	        case 6:
+	        	printf("请输入 x 的值：");
+	    		scanf("%lf", &x);
+				printf("arctan(%lf) = %lf\n", x, cmp_arct(x, n, accu, pi));
+	            break;       
+	        default:
+	            printf("无效的输入\n");
+//	            return 0; 
+	            break;
+    	}
+	    printf("请按任意键继续...\n");
+        getch();
+	}
+	return 0;
+}
+ 
 
