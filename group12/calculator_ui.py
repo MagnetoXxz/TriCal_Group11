@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QApplication,
                              QLineEdit, QPushButton, QGridLayout, QSizePolicy)
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtCore import Qt, QRegExp, QRect
+from SE import * 
 
 
 class Calculator(QWidget):
@@ -20,7 +21,7 @@ class Calculator(QWidget):
         self.char_stack = []  # 操作符号的栈
         self.num_stack = []  # 操作数的栈
         self.nums = [chr(i) for i in range(48, 58)]  # 用于判断按钮的值是不是数字
-        self.operators = ['sin', 'cos', 'tan', 'cot']  # 用于判断按钮的值是不是操作符
+        self.operators = ['sin', 'cos', 'tan','arcsin','arccos','arctan']  # 用于判断按钮的值是不是操作符
 
         self.empty_flag = True  # 这个flag的含义是来判断计算器是不是第一次启动，在显示屏幕中无数据
         self.after_operator = False  # 看了计算器的计算，比如1+2在输入+后，1海显示在屏幕上，输入了2之后，1就被替换了， 这个flag的作用就是这样的
@@ -55,10 +56,10 @@ class Calculator(QWidget):
         self.setLayout(grid)
 
         btn_names = [
-            'C', 'sin', 'cos', '/',
-            '7', '8', '9', '*',
-            '4', '5', '6', '-',
-            '1', '2', '3', '+',
+            'C', 'sin', 'cos', 'tan',
+            '7', '8', '9', 'arcsin',
+            '4', '5', '6', 'arccos',
+            '1', '2', '3', 'arctan',
             '0', '', '.', '='
         ]
 
@@ -117,15 +118,26 @@ class Calculator(QWidget):
     def deal_num_btn(self, sender_text):
         _str = self.line_edit.text()
         print(_str)
+        #print(_str)
         if _str == '0' or _str == 'Error' or self.empty_flag:
             self.line_edit.clear()
             self.line_edit.setText('Error')
+            self.num_operator = False
         elif self.after_operator:
-            self.line_edit.setText(_str + sender_text)
+            self.num_operator = True
+            num_ = ''
+            _str = _str+sender_text
+            self.line_edit.setText(_str)
+            for i in _str:
+                print(i)
+                if str.isdigit(i):
+                    num_ = num_ + i 
+            self.num = int(num_)
             self.empty_flag = False
         else:
             self.line_edit.setText('Error')
             self.empty_flag = True
+            self.num_operator = False
 
     def deal_operator_btn(self, sender_text):
         # 操作符号 
@@ -133,6 +145,7 @@ class Calculator(QWidget):
             self.line_edit.clear()
             self.line_edit.setText(sender_text)
             self.after_operator = True
+            self.operators_way = sender_text
             self.empty_flag = False
         else:
             _str = 'Error'
@@ -150,14 +163,25 @@ class Calculator(QWidget):
 
     def deal_equal_btn(self):
         _str = self.line_edit.text()
+        if self.after_operator == True and self.num_operator==True:
+            if 'sin' in self.operators_way:
+                self.line_edit.setText(str(sin_taylor(self.num))[:10])
+                print(str(sin_taylor(self.num)))
+            if 'cos' in self.operators_way:
+                self.line_edit.setText(str(cos_taylor(self.num))[:10])
+                print(str(sin_taylor(self.num)))
+            if 'tan' in self.operators_way:
+                self.line_edit.setText(str(tan_taylor(self.num))[:10])
+                print(str(sin_taylor(self.num)))
+            
         print(_str)
-        self.empty_flag = True
-        self.line_edit.clear()
-        self.line_edit.setText('0')
-        self.res = 0
+        #self.empty_flag = True
+        #self.line_edit.clear()
+        #self.line_edit.setText('0')
+        #self.res = 0
 
-        self.num_stack.clear()
-        self.char_stack.clear()
+        #self.num_stack.clear()
+        #self.char_stack.clear()
 
     def show_msg(self):
         # 看ui函数，每个按钮都连接了show_msg的点击事件
