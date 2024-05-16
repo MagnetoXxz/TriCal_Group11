@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QApplication,
                              QLineEdit, QPushButton, QGridLayout, QSizePolicy)
 from PyQt5.QtGui import QRegExpValidator
 from PyQt5.QtCore import Qt, QRegExp, QRect
-from SE import * 
+from SE import *
 
 
 class Calculator(QWidget):
@@ -21,11 +21,14 @@ class Calculator(QWidget):
         self.char_stack = []  # 操作符号的栈
         self.num_stack = []  # 操作数的栈
         self.nums = [chr(i) for i in range(48, 58)]  # 用于判断按钮的值是不是数字
-        self.operators = ['sin', 'cos', 'tan','arcsin','arccos','arctan']  # 用于判断按钮的值是不是操作符
+        self.operators = ['sin', 'cos', 'tan', 'arcsin', 'arccos', 'arctan']  # 用于判断按钮的值是不是操作符
 
         self.empty_flag = True  # 这个flag的含义是来判断计算器是不是第一次启动，在显示屏幕中无数据
         self.after_operator = False  # 看了计算器的计算，比如1+2在输入+后，1海显示在屏幕上，输入了2之后，1就被替换了， 这个flag的作用就是这样的
-
+        self.num_operator = False
+        self.operators_way = None
+        self.calCompleted = False
+        self.num = ""
         self.char_top = ''  # 保留栈顶的操作符号
         self.num_top = 0  # 保留栈顶的数值
         self.res = 0  # 保留计算结果，看计算器计算一次后，在继续按等号，还会重复最近一次的计算1+2,得到3之后，在按等号就是3+2， 以此类推.
@@ -83,11 +86,31 @@ class Calculator(QWidget):
                 grid.addWidget(btn, *pos, 1, 2)
             else:
                 grid.addWidget(btn, *pos)
+        self.numEnabled(False)
         self.setFocusPolicy(Qt.StrongFocus)
         self.setWindowTitle('Calculator')
         # self.move(300, 150)
         self.setGeometry(300, 150, 600, 700)  # Set initial size and position
         self.show()
+
+    def raiseError(self):
+        self.line_edit.setText('Error')
+        for button in self.buttons:
+            button.setEnabled(False)
+        self.buttons[0].setEnabled(True)
+
+    def numEnabled(self, enabled: bool):
+        self.buttons[4].setEnabled(enabled)
+        self.buttons[5].setEnabled(enabled)
+        self.buttons[6].setEnabled(enabled)
+        self.buttons[8].setEnabled(enabled)
+        self.buttons[9].setEnabled(enabled)
+        self.buttons[10].setEnabled(enabled)
+        self.buttons[12].setEnabled(enabled)
+        self.buttons[13].setEnabled(enabled)
+        self.buttons[14].setEnabled(enabled)
+        self.buttons[16].setEnabled(enabled)
+        self.buttons[17].setEnabled(enabled)
 
     def resizeEvent(self, event):
         # Adjust font size based on the widget size
@@ -109,79 +132,113 @@ class Calculator(QWidget):
             btn.setFont(font)
 
     def clear_line_edit(self):
+        for button in self.buttons:
+            button.setEnabled(True)
         self.line_edit.clear()
         self.line_edit.setText('0')
         self.res = 0
+        self.num = ""
         # 清空，就相当于刚打开计算器一样
         self.empty_flag = True
+        self.numEnabled(False)
+        self.after_operator = False
+        self.num_operator = False
 
     def deal_num_btn(self, sender_text):
+        # print(sender_text)
         _str = self.line_edit.text()
-        print(_str)
-        #print(_str)
-        if _str == '0' or _str == 'Error' or self.empty_flag:
+        # print(_str)
+        if _str == '0' or self.empty_flag:
             self.line_edit.clear()
-            self.line_edit.setText('Error')
-            self.num_operator = False
+            self.raiseError()
+            # self.num_operator = False
         elif self.after_operator:
-            self.num_operator = True
-            num_ = ''
-            _str = _str+sender_text
-            self.line_edit.setText(_str)
-            for i in _str:
-                print(i)
-                if str.isdigit(i):
-                    num_ = num_ + i 
-            self.num = int(num_)
-            self.empty_flag = False
+            _num = self.num
+            # _str_copy = _str
+            # _str = _str + sender_text
+            self.num += sender_text
+            if self.operators_way in ["arcsin", "arccos"]:
+                if float(self.num) < -1 or float(self.num) > 1:
+                    self.num = _num
+                    # _str = _str_copy
+                else:
+                    self.num_operator = True
+            else:
+                self.num_operator = True
+            self.line_edit.setText(self.operators_way + '(' + self.num + ')')
+            print(self.num)
+
+
         else:
-            self.line_edit.setText('Error')
+            self.raiseError()
             self.empty_flag = True
             self.num_operator = False
 
     def deal_operator_btn(self, sender_text):
-        # 操作符号 
-        if self.empty_flag:
+        # 操作符号
+        if self.empty_flag and not self.after_operator:
             self.line_edit.clear()
             self.line_edit.setText(sender_text)
             self.after_operator = True
             self.operators_way = sender_text
             self.empty_flag = False
+            self.numEnabled(True)
+        elif not self.empty_flag and self.after_operator and not self.num_operator:
+            self.line_edit.clear()
+            self.line_edit.setText(sender_text)
+            self.operators_way = sender_text
         else:
-            _str = 'Error'
-            self.line_edit.setText(_str)
+            self.raiseError()
             self.after_operator = False
-        
+
     def deal_point_btn(self):
-        _str = self.line_edit.text()
-        self.empty_flag = False
-        # 计算line_edit中有多少小数点
-        point_count = self.line_edit.text().count('.')
-        if point_count == 0:
-            _str += '.'
-        self.line_edit.setText(_str)
+        if self.after_operator and not self.num_operator:
+            self.raiseError()
+        else:
+            # _str = self.line_edit.text()
+            # self.empty_flag = False
+            # 计算line_edit中有多少小数点
+            point_count = self.line_edit.text().count('.')
+            if point_count == 0:
+                self.num += "."
+            self.line_edit.setText(self.operators_way + '(' + self.num + ')')
 
     def deal_equal_btn(self):
         _str = self.line_edit.text()
-        if self.after_operator == True and self.num_operator==True:
-            if 'sin' in self.operators_way:
-                self.line_edit.setText(str(sin_taylor(self.num))[:10])
-                print(str(sin_taylor(self.num)))
-            if 'cos' in self.operators_way:
-                self.line_edit.setText(str(cos_taylor(self.num))[:10])
-                print(str(sin_taylor(self.num)))
-            if 'tan' in self.operators_way:
-                self.line_edit.setText(str(tan_taylor(self.num))[:10])
-                print(str(sin_taylor(self.num)))
-            
         print(_str)
-        #self.empty_flag = True
-        #self.line_edit.clear()
-        #self.line_edit.setText('0')
-        #self.res = 0
+        self.line_edit.setText("Computing...")
+        if self.after_operator and self.num_operator:
+            # print(self.operators_way)
+            if 'sin' == self.operators_way:
+                print(self.num)
+                self.line_edit.setText(str(sin_taylor(float(self.num)))[:10])
+                print(str(sin_taylor(float(self.num))))
+            if 'cos' == self.operators_way:
+                self.line_edit.setText(str(cos_taylor(float(self.num)))[:10])
+                print(str(sin_taylor(float(self.num))))
+            if 'tan' == self.operators_way:
+                self.line_edit.setText(str(tan_taylor(float(self.num)))[:10])
+                print(str(sin_taylor(float(self.num))))
+            if 'arcsin' == self.operators_way:
+                self.line_edit.setText(str(arcsin_taylor(float(self.num)))[:10] + "°")
+                print(str(sin_taylor(float(self.num))))
+            if 'arccos' == self.operators_way:
+                self.line_edit.setText(str(arccos_taylor(float(self.num)))[:10] + "°")
+                print(str(sin_taylor(float(self.num))))
+            if 'arctan' == self.operators_way:
+                self.line_edit.setText(str(atan_taylor(float(self.num)))[:10] + "°")
+                print(str(sin_taylor(float(self.num))))
+            _str = self.line_edit.text()
+            self.clear_line_edit()
+            self.line_edit.setText(_str)
 
-        #self.num_stack.clear()
-        #self.char_stack.clear()
+        # self.empty_flag = True
+        # self.line_edit.clear()
+        # self.line_edit.setText('0')
+        # self.res = 0
+
+        # self.num_stack.clear()
+        # self.char_stack.clear()
 
     def show_msg(self):
         # 看ui函数，每个按钮都连接了show_msg的点击事件
