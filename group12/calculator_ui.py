@@ -16,6 +16,7 @@ class Calculator(QWidget):
     计算器的基本页面的基本界面, 完成基本的计算
     """
 
+
     def __init__(self):
         super(Calculator, self).__init__()
         self.ui()
@@ -30,6 +31,8 @@ class Calculator(QWidget):
         self.operators_way = None
         self.calCompleted = False
         self.num = ""
+
+
 
     def ui(self):
         # 这个函数主要适用于初始化界面
@@ -73,13 +76,13 @@ class Calculator(QWidget):
         self.setGeometry(300, 150, 600, 700)  # Set initial size and position
         self.show()
 
-    def raiseError(self):
+    def raiseError(self):  #报错函数
         self.line_edit.setText('Error')
         for button in self.buttons:
             button.setEnabled(False)
         self.buttons[0].setEnabled(True)
 
-    def numEnabled(self, enabled: bool):
+    def numEnabled(self, enabled: bool): #按键使能函数
         self.buttons[4].setEnabled(enabled)
         self.buttons[5].setEnabled(enabled)
         self.buttons[6].setEnabled(enabled)
@@ -92,12 +95,12 @@ class Calculator(QWidget):
         self.buttons[16].setEnabled(enabled)
         self.buttons[17].setEnabled(enabled)
 
-    def resizeEvent(self, event):
+    def resizeEvent(self, event):  #窗口大小设置
         # Adjust font size based on the widget size
         self.adjust_font_size()
         super().resizeEvent(event)
 
-    def adjust_font_size(self):
+    def adjust_font_size(self):  #自适应字体大小
         width = self.width()
         height = self.height()
 
@@ -111,7 +114,7 @@ class Calculator(QWidget):
         for btn in self.buttons:
             btn.setFont(font)
 
-    def clear_line_edit(self):
+    def clear_line_edit(self):  #清空函数
         for button in self.buttons:
             button.setEnabled(True)
         self.line_edit.clear()
@@ -125,13 +128,13 @@ class Calculator(QWidget):
         self.num_operator = False
         self.operators_way = None
 
-    def deal_negative_btn(self):
+    def deal_negative_btn(self):  #负号函数
         if self.operators_way and not self.num_operator:
             self.num += '-'
             self.line_edit.setText(self.operators_way + '(' + self.num + ')')
             self.num_operator = True
 
-    def deal_num_btn(self, sender_text):
+    def deal_num_btn(self, sender_text):  #输入数字识别
         _str = self.line_edit.text()
         if _str == '0' or self.empty_flag:
             self.line_edit.clear()
@@ -155,7 +158,7 @@ class Calculator(QWidget):
             self.empty_flag = True
             self.num_operator = False
 
-    def deal_operator_btn(self, sender_text):
+    def deal_operator_btn(self, sender_text):  #输入操作符识别
         # 操作符号
         if self.empty_flag and not self.after_operator:
             self.line_edit.clear()
@@ -172,7 +175,7 @@ class Calculator(QWidget):
             self.raiseError()
             self.after_operator = False
 
-    def deal_point_btn(self):
+    def deal_point_btn(self):  #输入小数点识别
         if self.after_operator and not self.num_operator:
             self.raiseError()
         elif self.after_operator and self.num != '-':
@@ -187,7 +190,7 @@ class Calculator(QWidget):
         else:
             self.raiseError()
 
-    def deal_equal_btn(self):
+    def deal_equal_btn(self):  #输入等号识别
         _str = self.line_edit.text()
         if self.after_operator and self.num_operator:
             result = self.compute()
@@ -202,7 +205,7 @@ class Calculator(QWidget):
             self.clear_line_edit()
             self.line_edit.setText(_str)
 
-    def compute(self):
+    def compute(self):  #计算函数
         result = None
         if 'sin' == self.operators_way:
             result = sin_taylor(float(self.num))
@@ -247,7 +250,7 @@ class Calculator(QWidget):
             self.raiseError()
         return result
 
-    def show_msg(self):
+    def show_msg(self):  #处理信号
         # 看ui函数，每个按钮都连接了show_msg的点击事件
         sender = self.sender()
         sender_text = sender.text()
