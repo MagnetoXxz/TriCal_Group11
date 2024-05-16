@@ -8,7 +8,7 @@
 2024/4/6 17:23   浛颖      1.0         这段代码实现了自定义的正弦、余弦和正切函数的计算，采用泰勒级数展开的方式进行近似计算。你可以根据需要调整精度和展开项数。
 2024/4/13  17:09  唐晨曦    1.0plus    修改了部分函数，添加了反三角函数部分
 '''
-
+# import math
 PI = 3.141592653589793238462643383279502884
 def sin_taylor(angle_in_degrees, precision=10**-15):
     """
@@ -65,7 +65,7 @@ def arcsin_taylor(angle_in_radian):
             t = t * (2 * n - 1) * (2 * n - 1) * angle_in_radian * angle_in_radian / ((2 * n) * (2 * n + 1))
             n += 1
             result += t
-        result = round(result / math.pi * 180, 10)
+        result = round(result / PI * 180, 10)
         return result
     else:
         print(" 请输入[-1 ，1]之间的数:")
@@ -116,7 +116,7 @@ def atan_taylor(x):
         if g >= 0:
             g = round((g - PI) / PI * 180, 10)
         else:
-            g = g + pi
+            g = g + PI
             g = round((g - PI) / PI * 180, 10)
 
     return g
