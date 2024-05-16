@@ -3,12 +3,11 @@
 
 
 import sys
-import time
 
-from PyQt5.QtWidgets import (QMainWindow, QWidget, QApplication,
+from PyQt5.QtWidgets import (QWidget, QApplication,
                              QLineEdit, QPushButton, QGridLayout, QSizePolicy)
 from PyQt5.QtGui import QRegExpValidator
-from PyQt5.QtCore import Qt, QRegExp, QRect
+from PyQt5.QtCore import Qt, QRegExp
 from SE import *
 
 
@@ -124,6 +123,7 @@ class Calculator(QWidget):
         self.numEnabled(False)
         self.after_operator = False
         self.num_operator = False
+        self.operators_way = None
 
     def deal_negative_btn(self):
         if self.operators_way and not self.num_operator:
@@ -175,7 +175,7 @@ class Calculator(QWidget):
     def deal_point_btn(self):
         if self.after_operator and not self.num_operator:
             self.raiseError()
-        elif self.num != '-':
+        elif self.after_operator and self.num != '-':
             # 计算line_edit中有多少小数点
             point_count = self.line_edit.text().count('.')
             if point_count == 0:
@@ -184,6 +184,8 @@ class Calculator(QWidget):
                 self.line_edit.setText(self.operators_way + '(' + self.num + '°' + ')')
             else:
                 self.line_edit.setText(self.operators_way + '(' + self.num + ')')
+        else:
+            self.raiseError()
 
     def deal_equal_btn(self):
         _str = self.line_edit.text()
