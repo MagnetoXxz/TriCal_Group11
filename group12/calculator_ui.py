@@ -166,7 +166,7 @@ class Calculator(QWidget):
             else:
                 self.num_operator = True
             self.line_edit.setText(self.operators_way + '(' + self.num + ')')
-            print(self.num)
+            # print(self.num)
 
 
         else:
@@ -205,40 +205,31 @@ class Calculator(QWidget):
 
     def deal_equal_btn(self):
         _str = self.line_edit.text()
-        print(_str)
-        self.line_edit.setText("Computing...")
+        # print(_str)
         if self.after_operator and self.num_operator:
             # print(self.operators_way)
             if 'sin' == self.operators_way:
-                print(self.num)
+                # print(self.num)
                 self.line_edit.setText(str(sin_taylor(float(self.num)))[:10])
-                print(str(sin_taylor(float(self.num))))
+                # print(str(sin_taylor(float(self.num))))
             if 'cos' == self.operators_way:
                 self.line_edit.setText(str(cos_taylor(float(self.num)))[:10])
-                print(str(sin_taylor(float(self.num))))
+                # print(str(sin_taylor(float(self.num))))
             if 'tan' == self.operators_way:
                 self.line_edit.setText(str(tan_taylor(float(self.num)))[:10])
-                print(str(sin_taylor(float(self.num))))
+                # print(str(sin_taylor(float(self.num))))
             if 'arcsin' == self.operators_way:
                 self.line_edit.setText(str(arcsin_taylor(float(self.num)))[:10] + "°")
-                print(str(sin_taylor(float(self.num))))
+                # print(str(sin_taylor(float(self.num))))
             if 'arccos' == self.operators_way:
                 self.line_edit.setText(str(arccos_taylor(float(self.num)))[:10] + "°")
-                print(str(sin_taylor(float(self.num))))
+                # print(str(sin_taylor(float(self.num))))
             if 'arctan' == self.operators_way:
                 self.line_edit.setText(str(atan_taylor(float(self.num)))[:10] + "°")
-                print(str(sin_taylor(float(self.num))))
+                # print(str(sin_taylor(float(self.num))))
             _str = self.line_edit.text()
             self.clear_line_edit()
             self.line_edit.setText(_str)
-
-        # self.empty_flag = True
-        # self.line_edit.clear()
-        # self.line_edit.setText('0')
-        # self.res = 0
-
-        # self.num_stack.clear()
-        # self.char_stack.clear()
 
     def show_msg(self):
         # 看ui函数，每个按钮都连接了show_msg的点击事件
