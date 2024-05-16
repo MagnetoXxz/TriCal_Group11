@@ -3,6 +3,8 @@
 
 
 import sys
+import time
+
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QApplication,
                              QLineEdit, QPushButton, QGridLayout, QSizePolicy)
 from PyQt5.QtGui import QRegExpValidator
@@ -29,18 +31,6 @@ class Calculator(QWidget):
         self.operators_way = None
         self.calCompleted = False
         self.num = ""
-        self.char_top = ''  # 保留栈顶的操作符号
-        self.num_top = 0  # 保留栈顶的数值
-        self.res = 0  # 保留计算结果，看计算器计算一次后，在继续按等号，还会重复最近一次的计算1+2,得到3之后，在按等号就是3+2， 以此类推.
-
-        # >先计算, 为什么同样的符号改成了后计算, 是为了方便做一项操作,
-        # 就是在你计算一个表达式之后，在继续按住等号, 以及会执行最后一次的符号运算
-        self.priority_map = {
-            '++': '>', '+-': '>', '-+': '>', '--': '>',
-            '+*': '<', '+/': '<', '-*': '<', '-/': '<',
-            '**': '>', '//': '>', '*+': '>', '/+': '>',
-            '*-': '>', '/-': '>', '*/': '>', '/*': '>'
-        }
 
     def ui(self):
         # 这个函数主要适用于初始化界面
@@ -63,33 +53,24 @@ class Calculator(QWidget):
             '7', '8', '9', 'arcsin',
             '4', '5', '6', 'arccos',
             '1', '2', '3', 'arctan',
-            '0', '', '.', '='
+            '0', '-', '.', '='
         ]
 
         grid.addWidget(self.line_edit, 0, 0, 1, 4)
         positions = [(i, j) for i in range(1, 6) for j in range(4)]
-        # # Define button size
-        # button_width = 80
-        # button_height = 60
         self.buttons = []
         for pos, name in zip(positions, btn_names):
             if name == '':
                 continue
             btn = QPushButton(name)
-            # btn.setFixedSize(button_width, button_height)  # Set button size
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             # 在布局的时候，直接把每个按钮连接到点击事件上
             btn.clicked.connect(self.show_msg)
             self.buttons.append(btn)
-            if name == '0':
-                tmp_pos = (pos[0], pos[1] + 1)
-                grid.addWidget(btn, *pos, 1, 2)
-            else:
-                grid.addWidget(btn, *pos)
+            grid.addWidget(btn, *pos)
         self.numEnabled(False)
         self.setFocusPolicy(Qt.StrongFocus)
         self.setWindowTitle('Calculator')
-        # self.move(300, 150)
         self.setGeometry(300, 150, 600, 700)  # Set initial size and position
         self.show()
 
@@ -144,31 +125,31 @@ class Calculator(QWidget):
         self.after_operator = False
         self.num_operator = False
 
+    def deal_negative_btn(self):
+        if self.operators_way and not self.num_operator:
+            self.num += '-'
+            self.line_edit.setText(self.operators_way + '(' + self.num + ')')
+            self.num_operator = True
+
     def deal_num_btn(self, sender_text):
-        # print(sender_text)
         _str = self.line_edit.text()
-        # print(_str)
         if _str == '0' or self.empty_flag:
             self.line_edit.clear()
             self.raiseError()
-            # self.num_operator = False
         elif self.after_operator:
             _num = self.num
-            # _str_copy = _str
-            # _str = _str + sender_text
             self.num += sender_text
             if self.operators_way in ["arcsin", "arccos"]:
                 if float(self.num) < -1 or float(self.num) > 1:
                     self.num = _num
-                    # _str = _str_copy
                 else:
                     self.num_operator = True
             else:
                 self.num_operator = True
-            self.line_edit.setText(self.operators_way + '(' + self.num + ')')
-            # print(self.num)
-
-
+            if self.operators_way in ["sin", "cos", "tan"]:
+                self.line_edit.setText(self.operators_way + '(' + self.num + '°' + ')')
+            else:
+                self.line_edit.setText(self.operators_way + '(' + self.num + ')')
         else:
             self.raiseError()
             self.empty_flag = True
@@ -194,42 +175,75 @@ class Calculator(QWidget):
     def deal_point_btn(self):
         if self.after_operator and not self.num_operator:
             self.raiseError()
-        else:
-            # _str = self.line_edit.text()
-            # self.empty_flag = False
+        elif self.num != '-':
             # 计算line_edit中有多少小数点
             point_count = self.line_edit.text().count('.')
             if point_count == 0:
                 self.num += "."
-            self.line_edit.setText(self.operators_way + '(' + self.num + ')')
+            if self.operators_way in ["sin", "cos", "tan"]:
+                self.line_edit.setText(self.operators_way + '(' + self.num + '°' + ')')
+            else:
+                self.line_edit.setText(self.operators_way + '(' + self.num + ')')
 
     def deal_equal_btn(self):
         _str = self.line_edit.text()
-        # print(_str)
         if self.after_operator and self.num_operator:
-            # print(self.operators_way)
-            if 'sin' == self.operators_way:
-                # print(self.num)
-                self.line_edit.setText(str(sin_taylor(float(self.num)))[:10])
-                # print(str(sin_taylor(float(self.num))))
-            if 'cos' == self.operators_way:
-                self.line_edit.setText(str(cos_taylor(float(self.num)))[:10])
-                # print(str(sin_taylor(float(self.num))))
-            if 'tan' == self.operators_way:
-                self.line_edit.setText(str(tan_taylor(float(self.num)))[:10])
-                # print(str(sin_taylor(float(self.num))))
-            if 'arcsin' == self.operators_way:
-                self.line_edit.setText(str(arcsin_taylor(float(self.num)))[:10] + "°")
-                # print(str(sin_taylor(float(self.num))))
-            if 'arccos' == self.operators_way:
-                self.line_edit.setText(str(arccos_taylor(float(self.num)))[:10] + "°")
-                # print(str(sin_taylor(float(self.num))))
-            if 'arctan' == self.operators_way:
-                self.line_edit.setText(str(atan_taylor(float(self.num)))[:10] + "°")
-                # print(str(sin_taylor(float(self.num))))
+            result = self.compute()
+            if self.operators_way in ["arcsin", "arccos", "arctan"]:
+                self.line_edit.setText(f"{result:.2f}" + '°')
+            else:
+                if type(result) == str:
+                    self.line_edit.setText(result)
+                else:
+                    self.line_edit.setText(f"{result:.2f}")
             _str = self.line_edit.text()
             self.clear_line_edit()
             self.line_edit.setText(_str)
+
+    def compute(self):
+        result = None
+        if 'sin' == self.operators_way:
+            result = sin_taylor(float(self.num))
+        if 'cos' == self.operators_way:
+            result = cos_taylor(float(self.num))
+        if 'tan' == self.operators_way:
+            if (float(self.num) + 90) % 180 == 0:
+                result = "inf"
+            else:
+                result = tan_taylor(float(self.num))
+        if 'arcsin' == self.operators_way:
+            if float(self.num) == -1:
+                result = -90
+            elif float(self.num) == 1:
+                result = 90
+            else:
+                if -1 < float(self.num) < -0.99999:
+                    c_9 = arcsin_taylor(-0.99999)
+                    result = -90 + (float(self.num) - (-1)) * (c_9 - (-90)) / (-0.99999 - (-1))
+                elif 0.99999 < float(self.num) < 1:
+                    c9 = arcsin_taylor(0.99999)
+                    result = c9 + (float(self.num) - 0.99999) * (90 - c9) / (1 - 0.99999)
+                else:
+                    result = arcsin_taylor(float(self.num))
+        if 'arccos' == self.operators_way:
+            if float(self.num) == -1:
+                result = 180
+            elif float(self.num) == 1:
+                result = 0
+            else:
+                if -1 < float(self.num) < -0.99999:
+                    c_9 = arccos_taylor(-0.99999)
+                    result = 180 + (float(self.num) - (-1)) * (c_9 - 180) / (-0.99999 - (-1))
+                elif 0.99999 < float(self.num) < 1:
+                    c9 = arccos_taylor(0.99999)
+                    result = c9 + (float(self.num) - 0.99999) * (0 - c9) / (1 - 0.99999)
+                else:
+                    result = arccos_taylor(float(self.num))
+        if 'arctan' == self.operators_way:
+            result = atan_taylor(float(self.num))
+        else:
+            self.raiseError()
+        return result
 
     def show_msg(self):
         # 看ui函数，每个按钮都连接了show_msg的点击事件
@@ -246,6 +260,10 @@ class Calculator(QWidget):
             self.deal_operator_btn(sender_text)
         elif sender_text == '=':
             self.deal_equal_btn()
+        elif sender_text == '-':
+            self.deal_negative_btn()
+        else:
+            self.raiseError()
 
 
 if __name__ == '__main__':
